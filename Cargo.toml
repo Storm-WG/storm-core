@@ -1,0 +1,30 @@
+[package]
+name = "storm-core"
+version = "0.1.0"
+license = "MIT"
+authors = ["Dr Maxim Orlovsky <orlovsky@pandoracore.com>"]
+description = "Storm Core Library: storage and messaging layer 3 on top of bitcoin & lightning network"
+repository = "https://github.com/storm-org/storm-core"
+homepage = "https://lnp-bp.org"
+keywords = ["bitcoin", "lightning", "storage", "smart-contracts", "lnp-bp"]
+categories = ["cryptography::cryptocurrencies"]
+readme = "README.md"
+edition = "2021"
+rust-version = "1.56.1"
+
+[lib]
+name = "storm"
+path = "src/lib.rs"
+crate-type = ["rlib", "staticlib"]
+
+[dependencies]
+amplify = "3.12.0"
+strict_encoding = "1.7.9"
+lnp2p = { version = "0.6.0-beta.2", git = "https://github.com/LNP-BP/lnp-core", branch = "bifrost", features = ["strict_encoding", "bifrost"] }
+serde_crate = { package = "serde", version = "1", features = ["derive"], optional = true }
+serde_with = { version = "1.8", features = ["hex"], optional = true }
+
+[features]
+default = []
+all = ["serde"]
+serde = ["serde_crate", "serde_with", "amplify/serde", "lnp2p/serde"]
