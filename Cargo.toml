@@ -1,6 +1,6 @@
 [package]
 name = "storm-core"
-version = "0.8.0-alpha.1"
+version = "0.1.0"
 license = "MIT"
 authors = ["Dr Maxim Orlovsky <orlovsky@lnp-bp.org>"]
 description = "Storm Core Library: storage and messaging layer 3 on top of bitcoin & lightning network"
@@ -19,6 +19,8 @@ path = "src/lib.rs"
 [dependencies]
 amplify = "3.12.0"
 strict_encoding = "1.8.8"
+commit_verify = "0.7.0" # TODO: Upgrade to 0.8
+bitcoin_hashes = "0.10.0"
 serde_crate = { package = "serde", version = "1", features = ["derive"], optional = true }
 serde_with = { version = "1.8", features = ["hex"], optional = true }
 

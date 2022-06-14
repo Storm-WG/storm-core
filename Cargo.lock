@@ -99,6 +99,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "commit_verify"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eac05c39ea303b263fff5ac3af85110e8ed306bccf4222ba11d434db3b4f78ba"
+dependencies = [
+ "amplify",
+ "bitcoin_hashes",
+ "strict_encoding",
+]
+
+[[package]]
 name = "darling"
 version = "0.13.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -342,9 +353,11 @@ dependencies = [
 
 [[package]]
 name = "storm-core"
-version = "0.8.0-alpha.1"
+version = "0.1.0"
 dependencies = [
  "amplify",
+ "bitcoin_hashes",
+ "commit_verify",
  "serde",
  "serde_with",
  "strict_encoding",
