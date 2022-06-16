@@ -18,7 +18,7 @@ pub static STORM_P2P_UNMARSHALLER: Lazy<Unmarshaller<Messages>> =
 
 pub type AppId = u16;
 
-#[derive(Clone, Debug, Display, Api)]
+#[derive(Clone, Debug, Display, Api, NetworkEncode, NetworkDecode)]
 #[api(encoding = "strict")]
 #[non_exhaustive]
 #[display(inner)]
