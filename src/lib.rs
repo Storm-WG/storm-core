@@ -12,7 +12,17 @@
 extern crate amplify;
 #[macro_use]
 extern crate strict_encoding;
+#[cfg(feature = "serde")]
+#[macro_use]
+extern crate serde_crate as serde;
+#[macro_use]
+extern crate internet2;
 
 mod chunk;
+pub mod p2p;
+mod container;
+mod mesg;
 
 pub use chunk::{Chunk, ChunkId};
+pub use container::{Container, ContainerId};
+pub use mesg::{Mesg, MesgId};
