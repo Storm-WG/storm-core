@@ -16,8 +16,9 @@ use strict_encoding::MediumVec;
 
 pub type ChunkId = sha256::Hash;
 
-#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Default, From)]
+#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Default, From, Display)]
 #[derive(NetworkEncode, NetworkDecode)]
+#[display("<chunk>")]
 pub struct Chunk(MediumVec<u8>);
 
 impl Deref for Chunk {
@@ -48,4 +49,8 @@ impl commit_encode::Strategy for Chunk {
 
 impl ConsensusCommit for Chunk {
     type Commitment = ChunkId;
+}
+
+impl Chunk {
+    pub fn chunk_id(&self) -> ChunkId { self.consensus_commit() }
 }
