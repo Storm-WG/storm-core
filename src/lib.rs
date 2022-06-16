@@ -22,7 +22,9 @@ mod chunk;
 pub mod p2p;
 mod container;
 mod mesg;
+mod app;
 
+pub use app::{StormApp, STORM_APP_RGB, STORM_APP_VENDOR_MASK};
 pub use chunk::{Chunk, ChunkId};
 pub use container::{Container, ContainerId};
 pub use mesg::{Mesg, MesgId};
