@@ -11,7 +11,7 @@
 use internet2::{CreateUnmarshaller, Unmarshaller};
 use once_cell::sync::Lazy;
 
-use crate::{Chunk, Container, Mesg, MesgId, StormApp};
+use crate::{Chunk, ChunkId, Container, Mesg, MesgId, StormApp};
 
 pub static STORM_P2P_UNMARSHALLER: Lazy<Unmarshaller<Messages>> =
     Lazy::new(|| Messages::create_unmarshaller());
@@ -92,7 +92,7 @@ impl StormMesg for ChunkPush {
 #[display("chunk({app}, {chunk_id})")]
 pub struct ChunkPoll {
     pub app: StormApp,
-    pub chunk_id: Chunk,
+    pub chunk_id: ChunkId,
 }
 
 impl StormMesg for ChunkPoll {
