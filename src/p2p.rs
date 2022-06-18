@@ -35,7 +35,7 @@ pub enum Messages {
     Push(ChunkPush),
 
     #[api(type = 0x0013)]
-    Chunk(ChunkPoll),
+    Chunk(ChunkPull),
 
     #[api(type = 0x0020)]
     Decline(DeclineResp),
@@ -90,12 +90,12 @@ impl StormMesg for ChunkPush {
 
 #[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
 #[display("chunk({app}, {chunk_id})")]
-pub struct ChunkPoll {
+pub struct ChunkPull {
     pub app: StormApp,
     pub chunk_id: ChunkId,
 }
 
-impl StormMesg for ChunkPoll {
+impl StormMesg for ChunkPull {
     fn storm_app(&self) -> StormApp { self.app }
 }
 
