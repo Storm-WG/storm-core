@@ -8,10 +8,13 @@
 // You should have received a copy of the MIT License along with this software.
 // If not, see <https://opensource.org/licenses/MIT>.
 
+use std::collections::BTreeSet;
+
 use internet2::{CreateUnmarshaller, Unmarshaller};
 use once_cell::sync::Lazy;
 
-use crate::{Chunk, ChunkId, Container, Mesg, MesgId, StormApp};
+use crate::mesg::Topic;
+use crate::{Chunk, ChunkId, Container, ContainerId, Mesg, MesgId, StormApp};
 
 pub static STORM_P2P_UNMARSHALLER: Lazy<Unmarshaller<Messages>> =
     Lazy::new(|| Messages::create_unmarshaller());
@@ -25,32 +28,96 @@ pub trait StormMesg {
 #[non_exhaustive]
 #[display(inner)]
 pub enum Messages {
-    #[api(type = 0x0010)]
+    /// List Storm apps supported by the node.
+    #[display("list_apps")]
+    #[api(type = 0x0002)]
+    ListApps,
+
+    /// List of Storm apps registered with the node for public announcement.
+    #[display("active_apps(...)")]
+    #[api(type = 0x0003)]
+    ActiveApps(BTreeSet<StormApp>),
+
+    /// List topics under the specificed app.
+    #[display("list_topics({0})")]
+    #[api(type = 0x0004)]
+    ListTopics(StormApp),
+
+    /// Response to `ListTopics` request.
+    #[api(type = 0x0005)]
+    AppTopics(TopicList),
+
+    /// Propose to create a new Storm application topic.
+    #[display("propose_topic({0})")]
+    #[api(type = 0x0006)]
+    ProposeTopic(Topic),
+
+    /// Post a message under specific app and topic from one peer to another.
+    /// Can be a reply to `Read` message or a spontaneous message, which will
+    /// require reply in form of `Accept` or `Decline` messages.
+    #[api(type = 0x0008)]
     Post(PostReq),
 
+    /// Read a message or a topic from an app.
+    #[api(type = 0x000a)]
+    #[display("read({0})")]
+    Read(MesgReq),
+
+    #[api(type = 0x000c)]
+    #[display("decline({0})")]
+    Decline(MesgReq),
+
+    #[api(type = 0x000e)]
+    #[display("accept({0})")]
+    Accept(MesgReq),
+
+    /// Request to obtain container information.
+    #[api(type = 0x0010)]
+    PullContainer(ContainerPull),
+
+    /// Response on container pull request providing with the container information (chunks, mime
+    /// etc).
     #[api(type = 0x0011)]
-    Read(ReadReq),
+    PushContainer(ContainerPush),
 
+    /// Pull a chunk data from a peer, if they are known to it.
     #[api(type = 0x0012)]
-    Push(ChunkPush),
+    PullChunk(ChunkPull),
 
+    /// Response to a chunk pull request, providing source data.
     #[api(type = 0x0013)]
-    Chunk(ChunkPull),
-
-    #[api(type = 0x0020)]
-    Decline(DeclineResp),
+    PushChunk(ChunkPush),
 }
 
 impl StormMesg for Messages {
     fn storm_app(&self) -> StormApp {
         match self {
+            Messages::ListApps => StormApp::System,
+            Messages::ActiveApps(_) => StormApp::System,
+            Messages::ListTopics(app) => *app,
+            Messages::AppTopics(msg) => msg.storm_app(),
+            Messages::ProposeTopic(msg) => msg.storm_app(),
+            Messages::Accept(msg) => msg.storm_app(),
+            Messages::PullContainer(msg) => msg.storm_app(),
+            Messages::PushContainer(msg) => msg.storm_app(),
             Messages::Post(msg) => msg.storm_app(),
             Messages::Read(msg) => msg.storm_app(),
-            Messages::Push(msg) => msg.storm_app(),
-            Messages::Chunk(msg) => msg.storm_app(),
+            Messages::PushChunk(msg) => msg.storm_app(),
+            Messages::PullChunk(msg) => msg.storm_app(),
             Messages::Decline(msg) => msg.storm_app(),
         }
     }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
+#[display("topic_list({app}, ...)")]
+pub struct TopicList {
+    pub app: StormApp,
+    pub topics: BTreeSet<MesgId>,
+}
+
+impl StormMesg for TopicList {
+    fn storm_app(&self) -> StormApp { self.app }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
@@ -58,7 +125,6 @@ impl StormMesg for Messages {
 pub struct PostReq {
     pub app: StormApp,
     pub message: Mesg,
-    pub container: Option<Container>,
 }
 
 impl StormMesg for PostReq {
@@ -66,33 +132,48 @@ impl StormMesg for PostReq {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
-#[display("read({app}, {message_id}, {with_container})")]
-pub struct ReadReq {
+#[display("{app}, {message_id}")]
+pub struct MesgReq {
     pub app: StormApp,
     pub message_id: MesgId,
-    pub with_container: bool,
 }
 
-impl StormMesg for ReadReq {
+impl StormMesg for MesgReq {
     fn storm_app(&self) -> StormApp { self.app }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
-#[display("push({app}, ...)")]
-pub struct ChunkPush {
+#[display("container_pull({app}, {message_id}, {container_id})")]
+pub struct ContainerPull {
     pub app: StormApp,
-    pub chunk: Chunk,
+    /// Message defining access rights to the container.
+    pub message_id: MesgId,
+    pub container_id: ContainerId,
 }
 
-impl StormMesg for ChunkPush {
+impl StormMesg for ContainerPull {
     fn storm_app(&self) -> StormApp { self.app }
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
-#[display("chunk({app}, {chunk_id})")]
+#[display("container_push({app}, {container_id}, ...)")]
+pub struct ContainerPush {
+    pub app: StormApp,
+    pub container_id: ContainerId,
+    pub container: Container,
+}
+
+impl StormMesg for ContainerPush {
+    fn storm_app(&self) -> StormApp { self.app }
+}
+
+#[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
+#[display("chunk_pull({app}, {message_id}, {container_id}, ...)")]
 pub struct ChunkPull {
     pub app: StormApp,
-    pub chunk_id: ChunkId,
+    pub message_id: MesgId,
+    pub container_id: ContainerId,
+    pub chunk_ids: BTreeSet<ChunkId>,
 }
 
 impl StormMesg for ChunkPull {
@@ -100,12 +181,14 @@ impl StormMesg for ChunkPull {
 }
 
 #[derive(Clone, PartialEq, Eq, Debug, Display, NetworkEncode, NetworkDecode)]
-#[display("decline({app}, {mesg_id})")]
-pub struct DeclineResp {
+#[display("chunk_push({app}, {container_id}, {chunk_id}, ...)")]
+pub struct ChunkPush {
     pub app: StormApp,
-    pub mesg_id: MesgId,
+    pub container_id: ContainerId,
+    pub chunk_id: ChunkId,
+    pub chunk: Chunk,
 }
 
-impl StormMesg for DeclineResp {
+impl StormMesg for ChunkPush {
     fn storm_app(&self) -> StormApp { self.app }
 }
