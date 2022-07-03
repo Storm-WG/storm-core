@@ -12,6 +12,7 @@ use std::io;
 
 use strict_encoding::{StrictDecode, StrictEncode};
 
+pub const STORM_APP_SYSTEM: u16 = 0x0000;
 pub const STORM_APP_RGB: u16 = 0x0001;
 pub const STORM_APP_VENDOR_MASK: u16 = 0x8000;
 
@@ -26,7 +27,12 @@ pub const STORM_APP_VENDOR_MASK: u16 = 0x8000;
 /// application name or developer domain name and do a binary OR operation
 /// with `0x8000`.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Display)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
 pub enum StormApp {
+    /// System Storm app.
+    #[display("system")]
+    System,
+
     /// RGB smart contracts.
     #[display("rgb")]
     Rgb,
@@ -44,6 +50,7 @@ pub enum StormApp {
 impl StormApp {
     pub fn app_code(self) -> u16 {
         match self {
+            StormApp::System => STORM_APP_SYSTEM,
             StormApp::Rgb => STORM_APP_RGB,
             StormApp::Future(app) => app,
             StormApp::Vendor(vendor) => vendor,
