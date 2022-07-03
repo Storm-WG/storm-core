@@ -38,7 +38,7 @@ pub enum Messages {
     #[api(type = 0x0003)]
     ActiveApps(BTreeSet<StormApp>),
 
-    /// List topics under the specificed app.
+    /// List topics under the specified app.
     #[display("list_topics({0})")]
     #[api(type = 0x0004)]
     ListTopics(StormApp),
@@ -80,12 +80,17 @@ pub enum Messages {
     #[api(type = 0x0011)]
     PushContainer(ContainerPush),
 
-    /// Pull a chunk data from a peer, if they are known to it.
+    /// Reject to provide the container
     #[api(type = 0x0012)]
+    #[display("reject({0})")]
+    Reject(ContainerPull),
+
+    /// Pull a chunk data from a peer, if they are known to it.
+    #[api(type = 0x0014)]
     PullChunk(ChunkPull),
 
     /// Response to a chunk pull request, providing source data.
-    #[api(type = 0x0013)]
+    #[api(type = 0x0015)]
     PushChunk(ChunkPush),
 }
 
@@ -105,6 +110,7 @@ impl StormMesg for Messages {
             Messages::PushChunk(msg) => msg.storm_app(),
             Messages::PullChunk(msg) => msg.storm_app(),
             Messages::Decline(msg) => msg.storm_app(),
+            Messages::Reject(msg) => msg.storm_app(),
         }
     }
 }
