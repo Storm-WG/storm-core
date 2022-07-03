@@ -11,7 +11,8 @@
 use bitcoin_hashes::{sha256, sha256t};
 use commit_verify::{commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash};
 
-use crate::ContainerId;
+use crate::p2p::StormMesg;
+use crate::{ContainerId, StormApp};
 
 // "storm:message"
 static MIDSTATE_MESG_ID: [u8; 32] = [
@@ -48,14 +49,54 @@ where Msg: AsRef<[u8]>
     fn commit(msg: &Msg) -> MesgId { MesgId::hash(msg) }
 }
 
+/// Storm topic data type
 #[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Display, AsAny)]
 #[derive(StrictEncode, StrictDecode)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
-#[display("Mesg")]
+#[display("{app}, ...")]
+pub struct Topic {
+    /// Application, under which the topic was created.
+    pub app: StormApp,
+
+    /// Topic message body. The encoding of the body data and their semantics is storm
+    /// application-specific.
+    pub body: Vec<u8>,
+
+    /// Ids of the container attachments.
+    pub container_id: Vec<ContainerId>,
+}
+
+impl StormMesg for Topic {
+    fn storm_app(&self) -> StormApp { self.app }
+}
+
+impl commit_encode::Strategy for Topic {
+    type Strategy = commit_encode::strategies::UsingStrict;
+}
+
+impl ConsensusCommit for Topic {
+    type Commitment = MesgId;
+}
+
+impl Topic {
+    pub fn mesg_id(&self) -> MesgId { self.consensus_commit() }
+}
+
+/// Storm message data type
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Display, AsAny)]
+#[derive(StrictEncode, StrictDecode)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
+#[display("{parent_id}, ...")]
 pub struct Mesg {
+    /// Parent message or topic ID.
     pub parent_id: MesgId,
-    pub data: Vec<u8>,
-    pub container_id: Option<ContainerId>,
+
+    /// Message body. The encoding of the body data and their semantics is storm
+    /// application-specific.
+    pub body: Vec<u8>,
+
+    /// Ids of the container attachments.
+    pub container_id: Vec<ContainerId>,
 }
 
 impl commit_encode::Strategy for Mesg {
