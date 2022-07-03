@@ -11,6 +11,8 @@
 use bitcoin_hashes::{sha256, sha256t};
 use commit_verify::{commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash};
 
+use crate::ContainerId;
+
 // "storm:message"
 static MIDSTATE_MESG_ID: [u8; 32] = [
     12, 61, 136, 60, 191, 129, 135, 229, 141, 35, 41, 161, 203, 125, 0, 101, 109, 136, 50, 236, 7,
@@ -50,7 +52,11 @@ where Msg: AsRef<[u8]>
 #[derive(StrictEncode, StrictDecode)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
 #[display("Mesg")]
-pub struct Mesg {}
+pub struct Mesg {
+    pub parent_id: MesgId,
+    pub data: Vec<u8>,
+    pub container_id: Option<ContainerId>,
+}
 
 impl commit_encode::Strategy for Mesg {
     type Strategy = commit_encode::strategies::UsingStrict;
