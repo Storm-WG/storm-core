@@ -8,6 +8,8 @@
 // You should have received a copy of the MIT License along with this software.
 // If not, see <https://opensource.org/licenses/MIT>.
 
+#![allow(clippy::clone_on_copy)]
+
 use std::collections::BTreeSet;
 use std::fmt::{self, Display, Formatter};
 
@@ -20,7 +22,7 @@ use crate::mesg::Topic;
 use crate::{Chunk, ChunkId, Container, ContainerId, Mesg, MesgId, StormApp};
 
 pub static STORM_P2P_UNMARSHALLER: Lazy<Unmarshaller<Messages>> =
-    Lazy::new(|| Messages::create_unmarshaller());
+    Lazy::new(Messages::create_unmarshaller);
 
 pub trait StormMesg {
     fn storm_app(&self) -> StormApp;
