@@ -9,15 +9,17 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 
 use bitcoin_hashes::{sha256, sha256t};
-use commit_verify::{commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash};
+use commit_verify::{
+    commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash,
+};
 
 use crate::p2p::StormMesg;
 use crate::{ContainerId, StormApp};
 
 // "storm:message"
 static MIDSTATE_MESG_ID: [u8; 32] = [
-    12, 61, 136, 60, 191, 129, 135, 229, 141, 35, 41, 161, 203, 125, 0, 101, 109, 136, 50, 236, 7,
-    101, 59, 39, 148, 207, 63, 236, 255, 48, 24, 171,
+    12, 61, 136, 60, 191, 129, 135, 229, 141, 35, 41, 161, 203, 125, 0, 101,
+    109, 136, 50, 236, 7, 101, 59, 39, 148, 207, 63, 236, 255, 48, 24, 171,
 ];
 
 /// Tag used for [`MesgId`] hash type
@@ -37,7 +39,9 @@ impl sha256t::Tag for MesgIdTag {
     derive(Serialize, Deserialize),
     serde(crate = "serde_crate", transparent)
 )]
-#[derive(Wrapper, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, From)]
+#[derive(
+    Wrapper, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, From
+)]
 #[derive(StrictEncode, StrictDecode)]
 #[wrapper(Debug, Display)]
 pub struct MesgId(sha256t::Hash<MesgIdTag>);
@@ -52,14 +56,18 @@ where Msg: AsRef<[u8]>
 /// Storm topic data type
 #[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Display, AsAny)]
 #[derive(StrictEncode, StrictDecode)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 #[display("{app}, ...")]
 pub struct Topic {
     /// Application, under which the topic was created.
     pub app: StormApp,
 
-    /// Topic message body. The encoding of the body data and their semantics is storm
-    /// application-specific.
+    /// Topic message body. The encoding of the body data and their semantics
+    /// is storm application-specific.
     pub body: Vec<u8>,
 
     /// Ids of the container attachments.
@@ -85,14 +93,18 @@ impl Topic {
 /// Storm message data type
 #[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Display, AsAny)]
 #[derive(StrictEncode, StrictDecode)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 #[display("{parent_id}, ...")]
 pub struct Mesg {
     /// Parent message or topic ID.
     pub parent_id: MesgId,
 
-    /// Message body. The encoding of the body data and their semantics is storm
-    /// application-specific.
+    /// Message body. The encoding of the body data and their semantics is
+    /// storm application-specific.
     pub body: Vec<u8>,
 
     /// Ids of the container attachments.

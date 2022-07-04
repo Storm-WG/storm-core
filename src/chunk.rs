@@ -14,9 +14,28 @@ use bitcoin_hashes::sha256;
 use commit_verify::{commit_encode, ConsensusCommit};
 use strict_encoding::MediumVec;
 
+use crate::ContainerId;
+
+/// ChunkId is a non-tagged hash of all of the chunk data. It is a single hash
+/// such that it can be length-extended; i.e. chunks are composable.
 pub type ChunkId = sha256::Hash;
 
-#[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Default, From, Display)]
+#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display)]
+#[derive(StrictEncode, StrictDecode)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
+#[display("{chunk_id}@{container_id}")]
+pub struct ChunkFullId {
+    pub container_id: ContainerId,
+    pub chunk_id: ChunkId,
+}
+
+#[derive(
+    Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Default, From, Display
+)]
 #[derive(NetworkEncode, NetworkDecode)]
 #[display("<chunk>")]
 pub struct Chunk(MediumVec<u8>);

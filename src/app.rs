@@ -27,7 +27,11 @@ pub const STORM_APP_VENDOR_MASK: u16 = 0x8000;
 /// application name or developer domain name and do a binary OR operation
 /// with `0x8000`.
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Display)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(crate = "serde_crate"))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
 pub enum StormApp {
     /// System Storm app.
     #[display("system")]
@@ -59,13 +63,18 @@ impl StormApp {
 }
 
 impl StrictEncode for StormApp {
-    fn strict_encode<E: io::Write>(&self, e: E) -> Result<usize, strict_encoding::Error> {
+    fn strict_encode<E: io::Write>(
+        &self,
+        e: E,
+    ) -> Result<usize, strict_encoding::Error> {
         self.app_code().strict_encode(e)
     }
 }
 
 impl StrictDecode for StormApp {
-    fn strict_decode<D: io::Read>(d: D) -> Result<Self, strict_encoding::Error> {
+    fn strict_decode<D: io::Read>(
+        d: D,
+    ) -> Result<Self, strict_encoding::Error> {
         u16::strict_decode(d).map(StormApp::from)
     }
 }
@@ -78,7 +87,9 @@ impl From<u16> for StormApp {
     fn from(code: u16) -> Self {
         match code {
             STORM_APP_RGB => StormApp::Rgb,
-            vendor if vendor & STORM_APP_VENDOR_MASK > 0 => StormApp::Vendor(vendor),
+            vendor if vendor & STORM_APP_VENDOR_MASK > 0 => {
+                StormApp::Vendor(vendor)
+            }
             future => StormApp::Future(future),
         }
     }
