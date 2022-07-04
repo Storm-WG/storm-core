@@ -24,7 +24,11 @@ mod container;
 mod mesg;
 mod app;
 
-pub use app::{StormApp, STORM_APP_RGB, STORM_APP_VENDOR_MASK};
-pub use chunk::{Chunk, ChunkId};
-pub use container::{Container, ContainerId};
-pub use mesg::{Mesg, MesgId};
+pub use app::{
+    StormApp, STORM_APP_CHAT, STORM_APP_RGB_CONTRACTS, STORM_APP_RGB_TRANSFERS,
+    STORM_APP_SEARCH, STORM_APP_STORAGE, STORM_APP_SYSTEM,
+    STORM_APP_VENDOR_MASK,
+};
+pub use chunk::{Chunk, ChunkFullId, ChunkId};
+pub use container::{Container, ContainerFullId, ContainerId};
+pub use mesg::{Mesg, MesgId, Topic};

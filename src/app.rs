@@ -13,7 +13,11 @@ use std::io;
 use strict_encoding::{StrictDecode, StrictEncode};
 
 pub const STORM_APP_SYSTEM: u16 = 0x0000;
-pub const STORM_APP_RGB: u16 = 0x0001;
+pub const STORM_APP_CHAT: u16 = 0x0001;
+pub const STORM_APP_STORAGE: u16 = 0x0002;
+pub const STORM_APP_SEARCH: u16 = 0x0003;
+pub const STORM_APP_RGB_CONTRACTS: u16 = 0x0004;
+pub const STORM_APP_RGB_TRANSFERS: u16 = 0x0005;
 pub const STORM_APP_VENDOR_MASK: u16 = 0x8000;
 
 /// Storm application identifier.
@@ -37,9 +41,25 @@ pub enum StormApp {
     #[display("system")]
     System,
 
-    /// RGB smart contracts.
-    #[display("rgb")]
-    Rgb,
+    /// Chat messaging storm app.
+    #[display("chat")]
+    Chat,
+
+    /// Distributed storage storm app.
+    #[display("storage")]
+    Storage,
+
+    /// Distributed data system with storage and search as a storm app.
+    #[display("search")]
+    Search,
+
+    /// RGB smart contracts distribution network.
+    #[display("rgb-contracts")]
+    RgbContracts,
+
+    /// State transfers between RGB smart contracts.
+    #[display("rgb-transfers")]
+    RgbTransfers,
 
     /// Future applications. Numbers are reserved for LNPBP standardized apps.
     #[display("future({0:#06})")]
@@ -55,7 +75,11 @@ impl StormApp {
     pub fn app_code(self) -> u16 {
         match self {
             StormApp::System => STORM_APP_SYSTEM,
-            StormApp::Rgb => STORM_APP_RGB,
+            StormApp::Chat => STORM_APP_CHAT,
+            StormApp::Storage => STORM_APP_STORAGE,
+            StormApp::Search => STORM_APP_SEARCH,
+            StormApp::RgbContracts => STORM_APP_RGB_CONTRACTS,
+            StormApp::RgbTransfers => STORM_APP_RGB_TRANSFERS,
             StormApp::Future(app) => app,
             StormApp::Vendor(vendor) => vendor,
         }
@@ -86,7 +110,12 @@ impl From<StormApp> for u16 {
 impl From<u16> for StormApp {
     fn from(code: u16) -> Self {
         match code {
-            STORM_APP_RGB => StormApp::Rgb,
+            STORM_APP_SYSTEM => StormApp::System,
+            STORM_APP_CHAT => StormApp::Chat,
+            STORM_APP_STORAGE => StormApp::Storage,
+            STORM_APP_SEARCH => StormApp::Search,
+            STORM_APP_RGB_CONTRACTS => StormApp::RgbContracts,
+            STORM_APP_RGB_TRANSFERS => StormApp::RgbTransfers,
             vendor if vendor & STORM_APP_VENDOR_MASK > 0 => {
                 StormApp::Vendor(vendor)
             }
