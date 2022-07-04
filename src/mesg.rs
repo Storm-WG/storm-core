@@ -12,9 +12,10 @@ use bitcoin_hashes::{sha256, sha256t};
 use commit_verify::{
     commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash,
 };
+#[cfg(feature = "serde")]
+use serde_with::{hex::Hex, As};
 
-use crate::p2p::StormMesg;
-use crate::{ContainerId, StormApp};
+use crate::ContainerId;
 
 // "storm:message"
 static MIDSTATE_MESG_ID: [u8; 32] = [
@@ -54,28 +55,21 @@ where Msg: AsRef<[u8]>
 }
 
 /// Storm topic data type
-#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, Display, AsAny)]
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, AsAny)]
 #[derive(StrictEncode, StrictDecode)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(crate = "serde_crate")
 )]
-#[display("{app}, ...")]
 pub struct Topic {
-    /// Application, under which the topic was created.
-    pub app: StormApp,
-
     /// Topic message body. The encoding of the body data and their semantics
     /// is storm application-specific.
+    #[cfg_attr(feature = "serde", serde(with = "As::<Hex>"))]
     pub body: Vec<u8>,
 
     /// Ids of the container attachments.
-    pub container_id: Vec<ContainerId>,
-}
-
-impl StormMesg for Topic {
-    fn storm_app(&self) -> StormApp { self.app }
+    pub container_ids: Vec<ContainerId>,
 }
 
 impl commit_encode::Strategy for Topic {
@@ -105,10 +99,11 @@ pub struct Mesg {
 
     /// Message body. The encoding of the body data and their semantics is
     /// storm application-specific.
+    #[cfg_attr(feature = "serde", serde(with = "As::<Hex>"))]
     pub body: Vec<u8>,
 
     /// Ids of the container attachments.
-    pub container_id: Vec<ContainerId>,
+    pub container_ids: Vec<ContainerId>,
 }
 
 impl commit_encode::Strategy for Mesg {

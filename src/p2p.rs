@@ -52,9 +52,9 @@ pub enum Messages {
     AppTopics(AppMsg<BTreeSet<MesgId>>),
 
     /// Propose to create a new Storm application topic.
-    #[display("propose_topic({0})")]
+    #[display("propose_topic(...)")]
     #[api(type = 0x0006)]
-    ProposeTopic(Topic),
+    ProposeTopic(AppMsg<Topic>),
 
     /// Post a message under specific app and topic from one peer to another.
     /// Can be a reply to `Read` message or a spontaneous message, which will
