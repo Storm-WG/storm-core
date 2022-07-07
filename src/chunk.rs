@@ -178,6 +178,22 @@ impl TryFrom<&[u8]> for Chunk {
     }
 }
 
+impl TryFrom<&Vec<u8>> for Chunk {
+    type Error = strict_encoding::Error;
+
+    fn try_from(vec: &Vec<u8>) -> Result<Self, Self::Error> {
+        MediumVec::try_from(vec.to_vec()).map(Self)
+    }
+}
+
+impl TryFrom<Vec<u8>> for Chunk {
+    type Error = strict_encoding::Error;
+
+    fn try_from(vec: Vec<u8>) -> Result<Self, Self::Error> {
+        MediumVec::try_from(vec).map(Self)
+    }
+}
+
 impl commit_encode::Strategy for Chunk {
     type Strategy = commit_encode::strategies::UsingStrict;
 }
