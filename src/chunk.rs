@@ -8,6 +8,7 @@
 // You should have received a copy of the MIT License along with this software.
 // If not, see <https://opensource.org/licenses/MIT>.
 
+use std::convert::Infallible;
 use std::ops::{Deref, DerefMut};
 
 use bitcoin_hashes::{sha256, Hash};
@@ -204,4 +205,14 @@ impl ConsensusCommit for Chunk {
 
 impl Chunk {
     pub fn chunk_id(&self) -> ChunkId { self.consensus_commit() }
+}
+
+impl TryToChunk for Chunk {
+    fn try_to_chunk(&self) -> Result<Chunk, TooLargeData> { Ok(self.clone()) }
+}
+
+impl TryFromChunk for Chunk {
+    type Error = Infallible;
+
+    fn try_from_chunk(chunk: Chunk) -> Result<Self, Self::Error> { Ok(chunk) }
 }
