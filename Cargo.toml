@@ -1,6 +1,6 @@
 [package]
 name = "storm-core"
-version = "0.7.0"
+version = "0.7.1"
 license = "MIT"
 authors = ["Dr Maxim Orlovsky <orlovsky@lnp-bp.org>"]
 description = "Storm Core Library: storage and messaging layer 3 on top of bitcoin & lightning network"

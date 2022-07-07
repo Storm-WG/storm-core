@@ -31,7 +31,6 @@ pub trait StormMesg {
 #[derive(Clone, Debug, Display, Api, NetworkEncode, NetworkDecode)]
 #[api(encoding = "strict")]
 #[non_exhaustive]
-#[display(inner)]
 pub enum Messages {
     /// List Storm apps supported by the node.
     #[display("list_apps")]

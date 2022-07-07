@@ -848,7 +848,7 @@ dependencies = [
 
 [[package]]
 name = "storm-core"
-version = "0.7.0"
+version = "0.7.1"
 dependencies = [
  "amplify",
  "bitcoin_hashes",

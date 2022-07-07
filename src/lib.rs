@@ -18,7 +18,7 @@ extern crate serde_crate as serde;
 #[macro_use]
 extern crate internet2;
 
-mod chunk;
+pub mod chunk;
 pub mod p2p;
 mod container;
 mod mesg;
@@ -29,6 +29,6 @@ pub use app::{
     STORM_APP_SEARCH, STORM_APP_STORAGE, STORM_APP_SYSTEM,
     STORM_APP_VENDOR_MASK,
 };
-pub use chunk::{Chunk, ChunkFullId, ChunkId};
+pub use chunk::{Chunk, ChunkFullId, ChunkId, TryFromChunk, TryToChunk};
 pub use container::{Container, ContainerFullId, ContainerId};
 pub use mesg::{Mesg, MesgId, Topic};

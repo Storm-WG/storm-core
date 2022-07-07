@@ -10,15 +10,49 @@
 
 use std::ops::{Deref, DerefMut};
 
-use bitcoin_hashes::sha256;
+use bitcoin_hashes::{sha256, Hash};
 use commit_verify::{commit_encode, ConsensusCommit};
-use strict_encoding::MediumVec;
+use strict_encoding::{MediumVec, StrictEncode};
 
 use crate::ContainerId;
 
 /// ChunkId is a non-tagged hash of all of the chunk data. It is a single hash
 /// such that it can be length-extended; i.e. chunks are composable.
 pub type ChunkId = sha256::Hash;
+
+pub trait ChunkIdExt {
+    fn with_fragments(
+        a: impl StrictEncode,
+        b: impl StrictEncode,
+    ) -> Result<ChunkId, strict_encoding::Error> {
+        let mut engine = ChunkId::engine();
+        a.strict_encode(&mut engine)?;
+        b.strict_encode(&mut engine)?;
+        Ok(ChunkId::from_engine(engine))
+    }
+
+    fn with_fixed_fragments(
+        a: impl StrictEncode,
+        b: impl StrictEncode,
+    ) -> ChunkId {
+        let mut engine = ChunkId::engine();
+        a.strict_encode(&mut engine)
+            .expect("chunk data must be strict-encodable");
+        b.strict_encode(&mut engine)
+            .expect("chunk data must be strict-encodable");
+        ChunkId::from_engine(engine)
+    }
+
+    fn try_from(
+        data: impl StrictEncode,
+    ) -> Result<ChunkId, strict_encoding::Error> {
+        let mut engine = ChunkId::engine();
+        data.strict_encode(&mut engine)?;
+        Ok(ChunkId::from_engine(engine))
+    }
+}
+
+impl ChunkIdExt for ChunkId {}
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display)]
 #[derive(StrictEncode, StrictDecode)]
@@ -31,6 +65,88 @@ pub type ChunkId = sha256::Hash;
 pub struct ChunkFullId {
     pub container_id: ContainerId,
     pub chunk_id: ChunkId,
+}
+
+#[derive(
+    Copy, Clone, Ord, PartialOrd, Eq, PartialEq, Hash, Debug, Display, Error
+)]
+#[display("data too large to produce a single chunk")]
+pub struct TooLargeData;
+
+pub trait TryToChunk {
+    fn try_to_chunk(&self) -> Result<Chunk, TooLargeData>;
+}
+
+pub trait TryFromChunk
+where Self: Sized
+{
+    type Error: std::error::Error;
+    fn try_from_chunk(chunk: Chunk) -> Result<Self, Self::Error>;
+}
+
+/// Marker trait defining specific encoding strategy which should be used for
+/// conversion into and from [`Chunk`] blob.
+pub trait Strategy {
+    /// Specific strategy. List of supported strategies:
+    /// - [`StrictEncoding`]
+    type Strategy;
+}
+
+pub mod strategies {
+    use strict_encoding::MediumVec;
+    pub use strict_encoding::{Error, StrictDecode, StrictEncode};
+
+    use super::{Chunk, Strategy};
+    use crate::chunk::{TooLargeData, TryFromChunk, TryToChunk};
+
+    /// Encodes/decodes data in the same way as they are encoded/decoded
+    /// according to strict encoding.
+    pub struct StrictEncoding;
+
+    impl<T> TryToChunk for T
+    where
+        T: Strategy + Clone,
+        amplify::Holder<T, <T as Strategy>::Strategy>: TryToChunk,
+    {
+        fn try_to_chunk(&self) -> Result<Chunk, TooLargeData> {
+            amplify::Holder::new(self.clone()).try_to_chunk()
+        }
+    }
+
+    impl<T> TryFromChunk for T
+    where
+        T: Strategy,
+        amplify::Holder<T, <T as Strategy>::Strategy>: TryFromChunk,
+    {
+        type Error = <amplify::Holder<T, <T as Strategy>::Strategy> as TryFromChunk>::Error;
+
+        fn try_from_chunk(chunk: Chunk) -> Result<T, Self::Error> {
+            amplify::Holder::try_from_chunk(chunk)
+                .map(amplify::Holder::into_inner)
+        }
+    }
+
+    impl<B> TryToChunk for amplify::Holder<B, StrictEncoding>
+    where B: StrictEncode
+    {
+        fn try_to_chunk(&self) -> Result<Chunk, TooLargeData> {
+            self.as_inner()
+                .strict_serialize()
+                .and_then(MediumVec::try_from)
+                .map(Chunk::from)
+                .map_err(|_| TooLargeData)
+        }
+    }
+
+    impl<B> TryFromChunk for amplify::Holder<B, StrictEncoding>
+    where B: StrictDecode
+    {
+        type Error = Error;
+
+        fn try_from_chunk(chunk: Chunk) -> Result<Self, Self::Error> {
+            B::strict_deserialize(chunk).map(amplify::Holder::new)
+        }
+    }
 }
 
 #[derive(
