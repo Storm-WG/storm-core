@@ -93,16 +93,40 @@ pub trait Strategy {
     type Strategy;
 }
 
-pub mod strategies {
+pub mod encoding {
     use strict_encoding::MediumVec;
     pub use strict_encoding::{Error, StrictDecode, StrictEncode};
 
     use super::{Chunk, Strategy};
     use crate::chunk::{TooLargeData, TryFromChunk, TryToChunk};
 
+    /// A marker trait for simple implementation of serialization into a
+    /// [`Chunk`] using strict encoding for existing types, including foreign
+    /// types.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[macro_use]
+    /// # extern crate strict_encoding;
+    /// # use storm::chunk;
+    ///
+    /// #[derive(StrictEncode, StrictDecode)]
+    /// struct Type {}
+    ///
+    /// impl chunk::encoding::ApplyStrictEncoding for Type {}
+    /// ```
+    pub trait ApplyStrictEncoding {}
+
+    impl<T> Strategy for T
+    where T: ApplyStrictEncoding
+    {
+        type Strategy = UseStrictEncoding;
+    }
+
     /// Encodes/decodes data in the same way as they are encoded/decoded
     /// according to strict encoding.
-    pub struct StrictEncoding;
+    pub struct UseStrictEncoding;
 
     impl<T> TryToChunk for T
     where
@@ -127,7 +151,7 @@ pub mod strategies {
         }
     }
 
-    impl<B> TryToChunk for amplify::Holder<B, StrictEncoding>
+    impl<B> TryToChunk for amplify::Holder<B, UseStrictEncoding>
     where B: StrictEncode
     {
         fn try_to_chunk(&self) -> Result<Chunk, TooLargeData> {
@@ -139,7 +163,7 @@ pub mod strategies {
         }
     }
 
-    impl<B> TryFromChunk for amplify::Holder<B, StrictEncoding>
+    impl<B> TryFromChunk for amplify::Holder<B, UseStrictEncoding>
     where B: StrictDecode
     {
         type Error = Error;

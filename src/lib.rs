@@ -29,6 +29,8 @@ pub use app::{
     STORM_APP_SEARCH, STORM_APP_STORAGE, STORM_APP_SYSTEM,
     STORM_APP_VENDOR_MASK,
 };
-pub use chunk::{Chunk, ChunkFullId, ChunkId, TryFromChunk, TryToChunk};
+pub use chunk::{
+    Chunk, ChunkFullId, ChunkId, ChunkIdExt, TryFromChunk, TryToChunk,
+};
 pub use container::{Container, ContainerFullId, ContainerId};
 pub use mesg::{Mesg, MesgId, Topic};
