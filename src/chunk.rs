@@ -85,23 +85,21 @@ where Self: Sized
     fn try_from_chunk(chunk: Chunk) -> Result<Self, Self::Error>;
 }
 
-/// Marker trait defining specific encoding strategy which should be used for
-/// conversion into and from [`Chunk`] blob.
-pub trait Strategy {
-    /// Specific strategy. List of supported strategies:
-    /// - [`StrictEncoding`]
-    type Strategy;
-}
-
 pub mod encoding {
-    use strict_encoding::MediumVec;
-    pub use strict_encoding::{Error, StrictDecode, StrictEncode};
+    use strict_encoding::{Error, MediumVec, StrictDecode, StrictEncode};
 
-    use super::{Chunk, Strategy};
-    use crate::chunk::{TooLargeData, TryFromChunk, TryToChunk};
+    use super::{Chunk, TooLargeData, TryFromChunk, TryToChunk};
+
+    /// Marker trait defining specific encoding strategy which should be used
+    /// for conversion into and from [`Chunk`] blob.
+    pub trait Strategy {
+        /// Specific strategy. List of supported strategies:
+        /// - [`StrictEncoding`]
+        type Strategy;
+    }
 
     /// A marker trait for simple implementation of serialization into a
-    /// [`Chunk`] using strict encoding for existing types, including foreign
+    /// [`Chunk`] using strict encoding for existing local types.
     /// types.
     ///
     /// # Example
