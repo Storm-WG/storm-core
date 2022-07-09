@@ -43,9 +43,9 @@ pub enum Messages {
     ActiveApps(BTreeSet<StormApp>),
 
     /// List topics under the specified app.
-    #[display("list_topics({0})")]
+    #[display("list_topics(...)")]
     #[api(type = 0x0004)]
-    ListTopics(StormApp),
+    ListTopics(AppMsg<()>),
 
     /// Response to `ListTopics` request.
     #[api(type = 0x0005)]
@@ -109,7 +109,7 @@ impl StormMesg for Messages {
         match self {
             Messages::ListApps => StormApp::System,
             Messages::ActiveApps(_) => StormApp::System,
-            Messages::ListTopics(app) => *app,
+            Messages::ListTopics(msg) => msg.storm_app(),
             Messages::AppTopics(msg) => msg.storm_app(),
             Messages::ProposeTopic(msg) => msg.storm_app(),
             Messages::Accept(msg) => msg.storm_app(),
