@@ -14,10 +14,11 @@ use strict_encoding::{StrictDecode, StrictEncode};
 
 pub const STORM_APP_SYSTEM: u16 = 0x0000;
 pub const STORM_APP_CHAT: u16 = 0x0001;
-pub const STORM_APP_STORAGE: u16 = 0x0002;
-pub const STORM_APP_SEARCH: u16 = 0x0003;
-pub const STORM_APP_RGB_CONTRACTS: u16 = 0x0004;
-pub const STORM_APP_RGB_TRANSFERS: u16 = 0x0005;
+pub const STORM_APP_FILE_TRANSFER: u16 = 0x0002;
+pub const STORM_APP_STORAGE: u16 = 0x0003;
+pub const STORM_APP_SEARCH: u16 = 0x0004;
+pub const STORM_APP_RGB_CONTRACTS: u16 = 0x0010;
+pub const STORM_APP_RGB_TRANSFERS: u16 = 0x0011;
 pub const STORM_APP_VENDOR_MASK: u16 = 0x8000;
 
 /// Storm application identifier.
@@ -44,6 +45,10 @@ pub enum StormApp {
     /// Chat messaging storm app.
     #[display("chat")]
     Chat,
+
+    /// Distributed storage storm app.
+    #[display("file-transfer")]
+    FileTransfer,
 
     /// Distributed storage storm app.
     #[display("storage")]
@@ -77,6 +82,7 @@ impl StormApp {
             StormApp::System => STORM_APP_SYSTEM,
             StormApp::Chat => STORM_APP_CHAT,
             StormApp::Storage => STORM_APP_STORAGE,
+            StormApp::FileTransfer => STORM_APP_FILE_TRANSFER,
             StormApp::Search => STORM_APP_SEARCH,
             StormApp::RgbContracts => STORM_APP_RGB_CONTRACTS,
             StormApp::RgbTransfers => STORM_APP_RGB_TRANSFERS,
@@ -113,6 +119,7 @@ impl From<u16> for StormApp {
             STORM_APP_SYSTEM => StormApp::System,
             STORM_APP_CHAT => StormApp::Chat,
             STORM_APP_STORAGE => StormApp::Storage,
+            STORM_APP_FILE_TRANSFER => StormApp::FileTransfer,
             STORM_APP_SEARCH => StormApp::Search,
             STORM_APP_RGB_CONTRACTS => StormApp::RgbContracts,
             STORM_APP_RGB_TRANSFERS => StormApp::RgbTransfers,
