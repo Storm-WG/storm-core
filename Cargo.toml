@@ -1,6 +1,6 @@
 [package]
 name = "storm-core"
-version = "0.8.0-beta.4"
+version = "0.8.0"
 license = "MIT"
 authors = ["Dr Maxim Orlovsky <orlovsky@lnp-bp.org>"]
 description = "Storm Core Library: storage and messaging layer 3 on top of bitcoin & lightning network"
@@ -17,12 +17,12 @@ name = "storm"
 path = "src/lib.rs"
 
 [dependencies]
-amplify = "3.12.1"
+amplify = "3.13.0"
 strict_encoding = "0.8.1"
 commit_verify = "0.8.0"
-stens = "0.7.0"
+stens = "0.7.1"
 lnpbp_bech32 = "0.8.0"
-internet2 = { version = "0.8.0", default-features = false, features = ["derive"] }
+internet2 = { version = "0.8.3", default-features = false, features = ["derive"] }
 bitcoin_hashes = "0.10.0"
 serde_crate = { package = "serde", version = "1", features = ["derive"], optional = true }
 serde_with = { version = "1.8", features = ["hex"], optional = true }

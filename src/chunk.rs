@@ -105,8 +105,7 @@ pub mod encoding {
     /// # Example
     ///
     /// ```
-    /// # #[macro_use]
-    /// # extern crate strict_encoding;
+    /// # use strict_encoding::{StrictEncode, StrictDecode};
     /// # use storm::chunk;
     ///
     /// #[derive(StrictEncode, StrictDecode)]
