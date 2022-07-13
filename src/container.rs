@@ -152,7 +152,7 @@ pub struct ContainerFullId {
     derive(Serialize, Deserialize),
     serde(crate = "serde_crate")
 )]
-pub struct Container {
+pub struct ContainerHeader {
     /// Version of the container. Always 0 for now.
     pub version: u16,
     /// MIME type of the file.
@@ -169,6 +169,25 @@ pub struct Container {
     /// Bifrost packet size is 2^24, we have only 24-5=19 bits to store the
     /// chunk index.
     pub size: u64,
+}
+
+#[derive(Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Debug, Display)]
+#[derive(NetworkEncode, NetworkDecode)]
+#[display("{id}")]
+pub struct ContainerInfo {
+    pub header: ContainerHeader,
+    pub id: ContainerFullId,
+}
+
+#[derive(Clone, Debug, PartialOrd, Ord, PartialEq, Eq, Hash, AsAny)]
+#[derive(StrictEncode, StrictDecode)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(crate = "serde_crate")
+)]
+pub struct Container {
+    pub header: ContainerHeader,
     pub chunks: MediumVec<ChunkId>,
 }
 

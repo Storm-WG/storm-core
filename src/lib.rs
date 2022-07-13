@@ -33,6 +33,7 @@ pub use chunk::{
     Chunk, ChunkFullId, ChunkId, ChunkIdExt, TryFromChunk, TryToChunk,
 };
 pub use container::{
-    Container, ContainerFullId, ContainerId, STORM_CONTAINER_ID_HRP,
+    Container, ContainerFullId, ContainerHeader, ContainerId, ContainerInfo,
+    STORM_CONTAINER_ID_HRP,
 };
 pub use mesg::{Mesg, MesgId, Topic};
