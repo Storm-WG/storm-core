@@ -13,7 +13,7 @@ use commit_verify::{
     commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash,
 };
 use stens::AsciiString;
-use strict_encoding::StrictEncode;
+use strict_encoding::{MediumVec, StrictEncode};
 
 use crate::{ChunkId, MesgId};
 
@@ -76,13 +76,23 @@ pub struct ContainerFullId {
     serde(crate = "serde_crate")
 )]
 pub struct Container {
+    /// Version of the container. Always 0 for now.
+    pub version: u16,
+    /// MIME type of the file.
     pub mime: AsciiString,
-    /// Container size.
+    /// UTF-8 description of the file.
+    pub info: String,
+    /// Container size, which is the sum of sizes of the individual chunks.
     ///
-    /// Consensus limitation of the container size is 32 bits: 16 bits for the
-    /// number of chunks and up to 24 bits for chunk size
+    /// Consensus limitation of the container size is 43 bits: 19 bits for the
+    /// number of chunks and up to 24 bits for chunk size. 19 bits for the max
+    /// number of chunks comes from the fact that the total size of the
+    /// container index must be below 2^24 bytes (to fit into a LN packet);
+    /// since the size of the chunk id is 2^5 (32) bits, and the maximum
+    /// Bifrost packet size is 2^24, we have only 24-5=19 bits to store the
+    /// chunk index.
     pub size: u64,
-    pub chunks: Vec<ChunkId>,
+    pub chunks: MediumVec<ChunkId>,
 }
 
 impl commit_encode::Strategy for Container {

@@ -1,6 +1,6 @@
 [package]
 name = "storm-core"
-version = "0.8.0-alpha.4"
+version = "0.8.0-beta.1"
 license = "MIT"
 authors = ["Dr Maxim Orlovsky <orlovsky@lnp-bp.org>"]
 description = "Storm Core Library: storage and messaging layer 3 on top of bitcoin & lightning network"
@@ -30,4 +30,4 @@ once_cell = "1.12.0"
 [features]
 default = []
 all = ["serde"]
-serde = ["serde_crate", "serde_with", "amplify/serde", "bitcoin_hashes/serde", "commit_verify/serde", "stens/serde", "internet2/serde"]
+serde = ["serde_crate", "serde_with", "amplify/serde", "bitcoin_hashes/serde", "commit_verify/serde", "strict_encoding/serde", "stens/serde", "internet2/serde"]
