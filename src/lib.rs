@@ -32,5 +32,7 @@ pub use app::{
 pub use chunk::{
     Chunk, ChunkFullId, ChunkId, ChunkIdExt, TryFromChunk, TryToChunk,
 };
-pub use container::{Container, ContainerFullId, ContainerId};
+pub use container::{
+    Container, ContainerFullId, ContainerId, STORM_CONTAINER_ID_HRP,
+};
 pub use mesg::{Mesg, MesgId, Topic};

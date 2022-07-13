@@ -12,6 +12,7 @@ use bitcoin_hashes::{sha256, sha256t};
 use commit_verify::{
     commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash,
 };
+use lnpbp_bech32::ToBech32String;
 use stens::AsciiString;
 use strict_encoding::{MediumVec, StrictEncode};
 
@@ -22,6 +23,8 @@ static MIDSTATE_CONTAINER_ID: [u8; 32] = [
     12, 61, 136, 60, 191, 129, 135, 229, 141, 35, 41, 161, 203, 125, 0, 101,
     109, 136, 50, 236, 7, 101, 59, 39, 148, 207, 63, 236, 255, 48, 24, 171,
 ];
+
+pub const STORM_CONTAINER_ID_HRP: &str = "storm";
 
 /// Tag used for [`ContainerId`] hash type
 pub struct ContainerIdTag;
@@ -36,15 +39,17 @@ impl sha256t::Tag for ContainerIdTag {
 
 /// Unique data container identifier
 #[derive(
-    Wrapper, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, From
+    Wrapper, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default,
+    Display, From
 )]
-#[derive(StrictEncode, StrictDecode)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(crate = "serde_crate", transparent)
 )]
-#[wrapper(Debug, Display)]
+#[derive(StrictEncode, StrictDecode)]
+#[wrapper(Debug, BorrowSlice)]
+#[display(ContainerId::to_bech32_string)]
 pub struct ContainerId(sha256t::Hash<ContainerIdTag>);
 
 impl<Msg> CommitVerify<Msg, PrehashedProtocol> for ContainerId
@@ -52,6 +57,15 @@ where Msg: AsRef<[u8]>
 {
     #[inline]
     fn commit(msg: &Msg) -> ContainerId { ContainerId::hash(msg) }
+}
+
+impl commit_encode::Strategy for ContainerId {
+    type Strategy = commit_encode::strategies::UsingStrict;
+}
+
+impl lnpbp_bech32::Strategy for ContainerId {
+    const HRP: &'static str = STORM_CONTAINER_ID_HRP;
+    type Strategy = lnpbp_bech32::strategies::UsingStrictEncoding;
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display)]

@@ -84,12 +84,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf9ff0bbfd639f15c74af777d81383cf53efb7c93613f6cab67c6c11e05bbf8b"
 
 [[package]]
+name = "bech32"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c5738be7561b0eeb501ef1d5c5db3f24e01ceb55fededd9b00039aada34966ad"
+
+[[package]]
 name = "bitcoin"
 version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "05bba324e6baf655b882df672453dbbc527bc938cadd27750ae510aaccc3a66a"
 dependencies = [
- "bech32",
+ "bech32 0.8.1",
  "bitcoin_hashes",
  "secp256k1",
 ]
@@ -552,6 +558,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
 
 [[package]]
+name = "lnpbp_bech32"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a96341da0f7e22d0fb0342247d5de628f7672ae8151a37d44343a7a2178367e"
+dependencies = [
+ "amplify",
+ "bech32 0.9.0",
+ "bitcoin_hashes",
+ "strict_encoding",
+]
+
+[[package]]
 name = "memchr"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -848,12 +866,13 @@ dependencies = [
 
 [[package]]
 name = "storm-core"
-version = "0.8.0-beta.1"
+version = "0.8.0-beta.2"
 dependencies = [
  "amplify",
  "bitcoin_hashes",
  "commit_verify",
  "internet2",
+ "lnpbp_bech32",
  "once_cell",
  "serde",
  "serde_with",
