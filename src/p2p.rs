@@ -19,7 +19,10 @@ use strict_encoding::{StrictDecode, StrictEncode};
 
 use crate::container::ContainerFullId;
 use crate::mesg::Topic;
-use crate::{Chunk, ChunkId, Container, ContainerId, Mesg, MesgId, StormApp};
+use crate::{
+    Chunk, ChunkId, Container, ContainerId, ContainerInfo, Mesg, MesgId,
+    StormApp,
+};
 
 pub static STORM_P2P_UNMARSHALLER: Lazy<Unmarshaller<Messages>> =
     Lazy::new(Messages::create_unmarshaller);
@@ -77,6 +80,11 @@ pub enum Messages {
     #[display("accept({0})")]
     Accept(AppMsg<MesgId>),
 
+    /// Announce container.
+    #[api(type = 0x0011)]
+    #[display("announce_container({0})")]
+    AnnounceContainer(AppMsg<ContainerInfo>),
+
     /// Request to obtain container information.
     #[api(type = 0x0010)]
     #[display("pull_container({0})")]
@@ -84,7 +92,7 @@ pub enum Messages {
 
     /// Response on container pull request providing with the container
     /// information (chunks, mime etc).
-    #[api(type = 0x0011)]
+    #[api(type = 0x0013)]
     #[display("push_container(...)")]
     PushContainer(AppMsg<Container>),
 
@@ -113,6 +121,7 @@ impl StormMesg for Messages {
             Messages::AppTopics(msg) => msg.storm_app(),
             Messages::ProposeTopic(msg) => msg.storm_app(),
             Messages::Accept(msg) => msg.storm_app(),
+            Messages::AnnounceContainer(msg) => msg.storm_app(),
             Messages::PullContainer(msg) => msg.storm_app(),
             Messages::PushContainer(msg) => msg.storm_app(),
             Messages::Post(msg) => msg.storm_app(),
