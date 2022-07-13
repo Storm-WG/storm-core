@@ -8,11 +8,13 @@
 // You should have received a copy of the MIT License along with this software.
 // If not, see <https://opensource.org/licenses/MIT>.
 
+use std::str::FromStr;
+
 use bitcoin_hashes::{sha256, sha256t};
 use commit_verify::{
     commit_encode, CommitVerify, ConsensusCommit, PrehashedProtocol, TaggedHash,
 };
-use lnpbp_bech32::ToBech32String;
+use lnpbp_bech32::{FromBech32Str, ToBech32String};
 use stens::AsciiString;
 use strict_encoding::{MediumVec, StrictEncode};
 
@@ -42,11 +44,6 @@ impl sha256t::Tag for ContainerIdTag {
     Wrapper, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default,
     Display, From
 )]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(crate = "serde_crate", transparent)
-)]
 #[derive(StrictEncode, StrictDecode)]
 #[wrapper(Debug, BorrowSlice)]
 #[display(ContainerId::to_bech32_string)]
@@ -66,6 +63,72 @@ impl commit_encode::Strategy for ContainerId {
 impl lnpbp_bech32::Strategy for ContainerId {
     const HRP: &'static str = STORM_CONTAINER_ID_HRP;
     type Strategy = lnpbp_bech32::strategies::UsingStrictEncoding;
+}
+
+// TODO: Make this part of `lnpbp::bech32`
+#[cfg(feature = "serde")]
+impl serde::Serialize for ContainerId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: serde::Serializer {
+        if serializer.is_human_readable() {
+            serializer.serialize_str(&self.to_bech32_string())
+        } else {
+            serializer.serialize_bytes(&self[..])
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> serde::Deserialize<'de> for ContainerId {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where D: serde::Deserializer<'de> {
+        struct Visitor;
+        impl serde::de::Visitor<'_> for Visitor {
+            type Value = ContainerId;
+
+            fn expecting(
+                &self,
+                formatter: &mut std::fmt::Formatter,
+            ) -> std::fmt::Result {
+                write!(
+                    formatter,
+                    "Bech32 string with `{}` HRP",
+                    STORM_CONTAINER_ID_HRP
+                )
+            }
+
+            fn visit_str<E>(self, v: &str) -> Result<Self::Value, E>
+            where E: serde::de::Error {
+                ContainerId::from_str(v).map_err(serde::de::Error::custom)
+            }
+
+            fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
+            where E: serde::de::Error {
+                self.visit_str(&v)
+            }
+
+            fn visit_byte_buf<E>(self, v: Vec<u8>) -> Result<Self::Value, E>
+            where E: serde::de::Error {
+                ContainerId::from_bytes(&v).map_err(|_| {
+                    serde::de::Error::invalid_length(v.len(), &"32 bytes")
+                })
+            }
+        }
+
+        if deserializer.is_human_readable() {
+            deserializer.deserialize_str(Visitor)
+        } else {
+            deserializer.deserialize_byte_buf(Visitor)
+        }
+    }
+}
+
+impl FromStr for ContainerId {
+    type Err = lnpbp_bech32::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        ContainerId::from_bech32_str(s)
+    }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug, Display)]
