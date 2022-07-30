@@ -156,7 +156,7 @@ pub struct ContainerHeader {
     /// Version of the container. Always 0 for now.
     pub version: u16,
     /// MIME type of the file.
-    pub mime: AsciiString,
+    pub mime: AsciiString, // TODO: Create a dedicated MIME type
     /// UTF-8 description of the file.
     pub info: String,
     /// Container size, which is the sum of sizes of the individual chunks.
@@ -170,6 +170,9 @@ pub struct ContainerHeader {
     /// chunk index.
     pub size: u64,
 }
+
+// TODO: Add convenience constructors for ContainerHeader constructing from
+//       a given mime type const string
 
 #[derive(Clone, PartialOrd, Ord, PartialEq, Eq, Hash, Debug, Display)]
 #[derive(NetworkEncode, NetworkDecode)]

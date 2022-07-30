@@ -80,7 +80,7 @@ pub enum Messages {
     #[display("accept({0})")]
     Accept(AppMsg<MesgId>),
 
-    // TODO: Consider using Storm mesgs for this
+    // TODO: Consider using Storm Post message for this.
     /// Announce container.
     #[api(type = 0x0011)]
     #[display("announce_container({0})")]
